@@ -5,9 +5,9 @@ Demonštračný projekt na **interné testovanie**: tri vizuálne odlišné land
 | Cesta | Šablóna | Štýl | Farby |
 |---|---|---|---|
 | `/` | rozcestník | – | – |
-| `/navrh-1` | BASIC (7 blokov) | minimalistický + elegantný + prírodný (oblúky, serif Cormorant, veľa priestoru) | béžová, biela, staroružová |
-| `/navrh-2` | PRO (11 blokov) | moderný + luxusný (tmavé plochy, ostré hrany, tenké linky, Playfair + Manrope) | zelená, biela, modrá |
-| `/navrh-3` | MAX (24 blokov) | editoriálny „glam“ s interaktivitou – zvolené AI | slivková, blush, koralová |
+| `/navrh-1` | BASIC – jednostránková prezentácia (7 blokov) | minimalistický + elegantný + prírodný | béžová, biela, staroružová |
+| `/navrh-2` | PRO – štandardný viacstránkový web (5 stránok: Domov, Služby, Realizácie, O nás, Kontakt) | moderný + luxusný | zelená, biela, modrá |
+| `/navrh-3` | MAX – rozšírený viacstránkový web s pokročilými funkciami (10 stránok: Domov, Služby, 3× detail služby, Realizácie, Cenník, O nás, Poradňa, Kontakt) | editoriálny „glam“ – zvolené AI | slivková, blush, koralová |
 
 **Zdôvodnenie štýlu návrhu 3:** klientkami permanentného make-upu sú ženy, ktoré hľadajú istotu a „premium“ pocit. Tmavá slivková s teplou koralovou a blush plochami pôsobí ako beauty magazín, zaobleným kartám a veľkému serifu pristane kombinácia kalkulačky, konfigurátora a galérie.
 
@@ -24,8 +24,12 @@ Screenshoty pre rozcestník (Playwright, vyžaduje beh servera a `npx playwright
 
 ```bash
 BASE_URL=http://localhost:3000 npm run screenshots
-BASE_URL=http://localhost:3000 node scripts/smoke.mjs   # dymový test sekcií a interakcií
+BASE_URL=http://localhost:3000 node scripts/smoke.mjs   # dymový test všetkých stránok, navigácie a interakcií
 ```
+
+## Informačná architektúra
+
+PRO a MAX boli rozdelené z pôvodných 11 a 24 sekcií na podstránky so spoločným layoutom (hlavička s aktívnou položkou, mobilné menu, päta). V MAX sa konfigurátor a kalkulačka zjednotili do jedného nástroja `PriceBuilder` na stránke Cenník. Lead magnet je v Poradni, technológie a čísla na stránke O nás. Texty detailov služieb (`data/services-detail.ts`) sú demonštračné, ceny a postup vychádzajú z conturemakeup.sk.
 
 ## Zdroje a pôvod údajov
 

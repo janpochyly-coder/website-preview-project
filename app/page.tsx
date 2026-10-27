@@ -3,9 +3,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const designs = [
-  { n: 1, name: "Conture Make-Up", tpl: "BASIC · 7 blokov", style: "Minimalistický + elegantný + prírodný", colors: [["#f7f1e8", "Béžová"], ["#ffffff", "Biela"], ["#8f4f5a", "Staroružová"]], href: "/navrh-1" },
-  { n: 2, name: "Conture Make-Up", tpl: "PRO · 11 blokov", style: "Moderný + luxusný", colors: [["#07241f", "Zelená"], ["#ffffff", "Biela"], ["#123a5c", "Modrá"]], href: "/navrh-2" },
-  { n: 3, name: "Conture Make-Up", tpl: "MAX · 24 blokov", style: "Editoriálny glam s interaktivitou (zvolené AI)", colors: [["#2a1a24", "Slivková"], ["#fbf1ee", "Blush"], ["#b3472f", "Koralová"]], href: "/navrh-3" },
+  { n: 1, name: "Conture Make-Up", tpl: "BASIC · jednostránková prezentácia (7 blokov)", style: "Minimalistický + elegantný + prírodný", colors: [["#f7f1e8", "Béžová"], ["#ffffff", "Biela"], ["#8f4f5a", "Staroružová"]], href: "/navrh-1" },
+  { n: 2, name: "Conture Make-Up", tpl: "PRO · štandardný viacstránkový web (5 stránok)", style: "Moderný + luxusný", colors: [["#07241f", "Zelená"], ["#ffffff", "Biela"], ["#123a5c", "Modrá"]], href: "/navrh-2" },
+  { n: 3, name: "Conture Make-Up", tpl: "MAX · rozšírený viacstránkový web s pokročilými funkciami (10 stránok)", style: "Editoriálny glam s interaktivitou (zvolené AI)", colors: [["#2a1a24", "Slivková"], ["#fbf1ee", "Blush"], ["#b3472f", "Koralová"]], href: "/navrh-3" },
 ];
 
 export default function Hub() {

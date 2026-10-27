@@ -2,19 +2,21 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X, Plus, Minus, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { services } from "@/data/business";
+import { BASE, NAV, btn, serif } from "./ui";
 
-const serif = { fontFamily: "var(--f-serif)" };
-const btn = "inline-flex items-center justify-center rounded-full bg-[#b3472f] px-7 py-3 text-sm font-medium text-white transition hover:bg-[#8f3722]";
 
-/* 1. Smart header: skrýva sa pri skrolovaní nadol, ukazuje progres a aktívnu sekciu */
-const NAV = [["#sluzby", "Služby"], ["#proces", "Proces"], ["#galeria", "Portfólio"], ["#konfigurator", "Konfigurátor"], ["#cennik", "Cenník"], ["#kalkulacka", "Kalkulačka"], ["#faq", "FAQ"], ["#kontakt", "Kontakt"]];
+/* 1. Smart header: skrýva sa pri skrolovaní nadol, ukazuje progres a aktívnu stránku */
 export function SmartHeader() {
+  const path = usePathname();
   const [hidden, setHidden] = useState(false);
   const [progress, setProgress] = useState(0);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("");
   const last = useRef(0);
+  const isActive = (h: string) => path === h || path.startsWith(h + "/");
+  useEffect(() => { setOpen(false); }, [path]);
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -24,21 +26,19 @@ export function SmartHeader() {
       setProgress(max > 0 ? (y / max) * 100 : 0);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive("#" + e.target.id)), { rootMargin: "-40% 0px -55% 0px" });
-    NAV.forEach(([h]) => { const el = document.querySelector(h); if (el) io.observe(el); });
-    return () => { window.removeEventListener("scroll", onScroll); io.disconnect(); };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [open]);
   return (
     <header className={`fixed inset-x-0 top-0 z-50 bg-[#2a1a24]/95 text-white backdrop-blur transition-transform duration-300 ${hidden ? "-translate-y-full" : ""}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <a href="#" className="text-2xl" style={serif}>Conture<span className="text-[#f2b8a6]">.</span></a>
-        <nav aria-label="Hlavná navigácia" className="hidden gap-6 text-sm xl:flex">
-          {NAV.map(([h, l]) => (<a key={h} href={h} aria-current={active === h ? "true" : undefined} className={`transition hover:text-[#f2b8a6] ${active === h ? "text-[#f2b8a6]" : ""}`}>{l}</a>))}
+        <Link href={BASE} className="text-2xl" style={serif}>Conture<span className="text-[#f2b8a6]">.</span></Link>
+        <nav aria-label="Hlavná navigácia" className="hidden gap-7 text-sm xl:flex">
+          {NAV.map(([h, l]) => (<Link key={h} href={h} aria-current={isActive(h) ? "page" : undefined} className={`transition hover:text-[#f2b8a6] ${isActive(h) ? "text-[#f2b8a6] underline underline-offset-8" : ""}`}>{l}</Link>))}
         </nav>
-        <a href="#kontakt" className={`${btn} hidden !py-2 xl:inline-flex`}>Objednať sa</a>
+        <Link href={`${BASE}/kontakt`} className={`${btn} hidden !py-2 xl:inline-flex`}>Objednať sa</Link>
         <button type="button" className="p-2 xl:hidden" aria-expanded={open} aria-controls="n3-menu" aria-label={open ? "Zavrieť menu" : "Otvoriť menu"} onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
       </div>
-      {open && (<nav id="n3-menu" aria-label="Mobilné menu" className="grid border-t border-white/10 px-6 py-3 xl:hidden">{NAV.map(([h, l]) => (<a key={h} href={h} className="py-3 text-lg" onClick={() => setOpen(false)}>{l}</a>))}</nav>)}
+      {open && (<nav id="n3-menu" aria-label="Mobilné menu" className="grid border-t border-white/10 px-6 py-3 xl:hidden">{NAV.map(([h, l]) => (<Link key={h} href={h} aria-current={isActive(h) ? "page" : undefined} className={`py-3 text-lg ${isActive(h) ? "text-[#f2b8a6]" : ""}`} onClick={() => setOpen(false)}>{l}</Link>))}<Link href={`${BASE}/kontakt`} className={`${btn} my-3`} onClick={() => setOpen(false)}>Objednať sa</Link></nav>)}
       <div className="h-0.5 bg-[#f2b8a6]" style={{ width: `${progress}%` }} aria-hidden />
     </header>
   );
@@ -65,6 +65,7 @@ export function ServiceTabs() {
           <h3 className="text-3xl" style={serif}>{s.title}</h3>
           <p className="mt-3 text-[#4a3943]">{s.text}</p>
           <ul className="mt-5 divide-y divide-[#ecd9d3] text-sm">{s.items.map((it) => (<li key={it.name} className="flex justify-between py-2"><span>{it.name}</span><strong>{it.price} €</strong></li>))}</ul>
+          <Link href={`${BASE}/sluzby/${s.id}`} className={`${btn} mt-6`}>Detail služby</Link>
         </div>
       </div>
     </div>
@@ -160,55 +161,31 @@ export function BeforeAfter() {
   );
 }
 
-/* 16. Interaktívny konfigurátor */
-const CFG = {
-  Obočie: [["Čiarkované", 250], ["Púdrové", 250], ["Kombo", 250]],
-  "Očné linky": [["Jemné", 120], ["Dekoratívne", 160], ["Spodné jemné", 100]],
-  Pery: [["Plnovytieňované", 350]],
-} as Record<string, [string, number][]>;
-const SHADES = [["Prirodzený", "#9b6b58"], ["Jemný", "#c99c8b"], ["Sýty", "#6f3b33"], ["Chladný", "#5a4a4d"]];
-export function Configurator() {
-  const [area, setArea] = useState("Obočie");
-  const [tech, setTech] = useState(0);
-  const [shade, setShade] = useState(0);
-  const opts = CFG[area];
-  const [tn, price] = opts[Math.min(tech, opts.length - 1)];
-  return (
-    <div className="mt-10 grid gap-8 rounded-3xl bg-white p-6 md:grid-cols-[1.2fr_1fr] md:p-10">
-      <div className="grid gap-7">
-        <fieldset><legend className="mb-3 text-sm font-medium">1. Partia</legend><div className="flex flex-wrap gap-2">{Object.keys(CFG).map((a) => (<label key={a} className={`cursor-pointer rounded-full border px-5 py-2 text-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${area === a ? "border-[#2a1a24] bg-[#2a1a24] text-white" : "border-[#d9c2bb]"}`}><input type="radio" name="area" className="sr-only" checked={area === a} onChange={() => { setArea(a); setTech(0); }} />{a}</label>))}</div></fieldset>
-        <fieldset><legend className="mb-3 text-sm font-medium">2. Technika</legend><div className="flex flex-wrap gap-2">{opts.map(([n, p], k) => (<label key={n} className={`cursor-pointer rounded-full border px-5 py-2 text-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${tech === k ? "border-[#2a1a24] bg-[#2a1a24] text-white" : "border-[#d9c2bb]"}`}><input type="radio" name="tech" className="sr-only" checked={tech === k} onChange={() => setTech(k)} />{n} · {p} €</label>))}</div></fieldset>
-        <fieldset><legend className="mb-3 text-sm font-medium">3. Odtieň (orientačne)</legend><div className="flex flex-wrap gap-3">{SHADES.map(([n, c], k) => (<label key={n} className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${shade === k ? "border-[#2a1a24] border-2" : "border-[#d9c2bb]"}`}><input type="radio" name="shade" className="sr-only" checked={shade === k} onChange={() => setShade(k)} /><span className="h-5 w-5 rounded-full" style={{ background: c }} aria-hidden />{n}</label>))}</div></fieldset>
-      </div>
-      <div className="rounded-2xl bg-[#2a1a24] p-7 text-white" aria-live="polite">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#f2b8a6]">Váš výber</p>
-        <p className="mt-4 text-3xl" style={serif}>{area}: {tn.toLowerCase()}</p>
-        <p className="mt-1 flex items-center gap-2 text-white/80"><span className="h-4 w-4 rounded-full" style={{ background: SHADES[shade][1] }} aria-hidden />Odtieň: {SHADES[shade][0].toLowerCase()}</p>
-        <p className="mt-6 text-5xl" style={serif}>{price} €</p>
-        <p className="mt-1 text-xs text-white/70">Cena z cenníka Bratislava. Odtieň a tvar sa potvrdzujú pri konzultácii.</p>
-        <a href="#kontakt" className={`${btn} mt-6`}>Pokračovať na objednávku</a>
-      </div>
-    </div>
-  );
-}
-
-/* 18. Kalkulačka */
+/* 16+18. Spojený nástroj: konfigurátor + kalkulačka cien (jeden tok: výber služieb → odtieň → súhrn) */
 const CALC = [["Čiarkované obočie", 250], ["Púdrové obočie", 250], ["Kombo obočie", 250], ["Očné linky jemné", 120], ["Očné linky dekoratívne", 160], ["Očné linky spodné jemné", 100], ["Plnovytieňované pery", 350]] as [string, number][];
-export function Calculator() {
+const SHADES = [["Prirodzený", "#9b6b58"], ["Jemný", "#c99c8b"], ["Sýty", "#6f3b33"], ["Chladný", "#5a4a4d"]];
+export function PriceBuilder() {
   const [sel, setSel] = useState<Record<string, boolean>>({});
+  const [shade, setShade] = useState(0);
   const items = CALC.filter(([n]) => sel[n]);
   const sum = items.reduce((a, [, p]) => a + p, 0);
   return (
     <div className="mt-10 grid gap-8 md:grid-cols-[1.3fr_1fr]">
-      <fieldset className="grid gap-3"><legend className="sr-only">Vyberte služby</legend>
-        {CALC.map(([n, p]) => (<label key={n} className="flex cursor-pointer items-center justify-between rounded-2xl bg-white px-5 py-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2"><span className="flex items-center gap-3"><input type="checkbox" className="h-5 w-5 accent-[#b3472f]" checked={!!sel[n]} onChange={(e) => setSel({ ...sel, [n]: e.target.checked })} />{n}</span><strong>{p} €</strong></label>))}
-      </fieldset>
+      <div className="grid gap-8">
+        <fieldset className="grid gap-3"><legend className="mb-3 text-sm font-medium">1. Vyberte služby</legend>
+          {CALC.map(([n, p]) => (<label key={n} className="flex cursor-pointer items-center justify-between rounded-2xl bg-white px-5 py-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2"><span className="flex items-center gap-3"><input type="checkbox" className="h-5 w-5 accent-[#b3472f]" checked={!!sel[n]} onChange={(e) => setSel({ ...sel, [n]: e.target.checked })} />{n}</span><strong>{p} €</strong></label>))}
+        </fieldset>
+        <fieldset><legend className="mb-3 text-sm font-medium">2. Odtieň (orientačne)</legend><div className="flex flex-wrap gap-3">{SHADES.map(([n, c], k) => (<label key={n} className={`flex cursor-pointer items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${shade === k ? "border-2 border-[#2a1a24]" : "border-[#d9c2bb]"}`}><input type="radio" name="shade" className="sr-only" checked={shade === k} onChange={() => setShade(k)} /><span className="h-5 w-5 rounded-full" style={{ background: c }} aria-hidden />{n}</label>))}</div></fieldset>
+      </div>
       <div className="h-fit rounded-3xl bg-[#2a1a24] p-7 text-white" aria-live="polite">
-        <p className="text-xs uppercase tracking-[0.25em] text-[#f2b8a6]">Orientačná cena</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-[#f2b8a6]">3. Váš výber a orientačná cena</p>
         <p className="mt-3 text-6xl" style={serif}>{sum} €</p>
         <p className="mt-2 text-sm text-white/80">{items.length ? `Vybrané položky: ${items.length}` : "Vyberte aspoň jednu službu."}</p>
-        <button type="button" onClick={() => setSel({})} className="mt-5 text-sm underline">Vynulovať</button>
-        <p className="mt-4 text-xs text-white/70">Orientačný súčet podľa cenníka z 19. 11. 2024, zmena cien vyhradená.</p>
+        {items.length > 0 && (<ul className="mt-3 grid gap-1 text-sm text-white/90">{items.map(([n, p]) => (<li key={n} className="flex justify-between"><span>{n}</span><span>{p} €</span></li>))}</ul>)}
+        <p className="mt-3 flex items-center gap-2 text-sm text-white/80"><span className="h-4 w-4 rounded-full" style={{ background: SHADES[shade][1] }} aria-hidden />Odtieň: {SHADES[shade][0].toLowerCase()}</p>
+        <button type="button" onClick={() => setSel({})} className="mt-4 text-sm underline">Vynulovať</button>
+        <Link href={`${BASE}/kontakt`} className={`${btn} mt-5 w-full`}>Pokračovať na objednávku</Link>
+        <p className="mt-4 text-xs text-white/70">Orientačný súčet podľa cenníka z 19. 11. 2024, zmena cien vyhradená. Tvar a odtieň sa potvrdzujú pri konzultácii.</p>
       </div>
     </div>
   );
