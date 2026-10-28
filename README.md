@@ -48,3 +48,19 @@ Všetky fotografie pochádzajú z Unsplash, sú **ilustračné** a nezobrazujú 
 
 - `next.config.mjs` definuje webpack alias `@` (alias z `tsconfig` sa v tomto prostredí nerozpoznal).
 - Port 3000 môže byť obsadený; použite `-p`.
+
+## Práca z viacerých počítačov
+
+Zdrojom pravdy je GitHub, nie OneDrive. Projekt držte mimo OneDrive (napr. `C:\dev`), aby sa nesynchronizoval `node_modules`.
+
+```bash
+git clone -b feature/tri-navrhy https://github.com/janpochyly-coder/website-preview-project.git
+cd website-preview-project
+npm install
+npm run dev
+```
+
+- Koniec práce: `git add -A`, `git commit -m "..."`, `git push`.
+- Začiatok práce na inom PC: `git pull`.
+- Vetva `feature/tri-navrhy` je produkčná vetva na Verceli – každý push ju prenasadí. Na skúšanie použite novú vetvu (Vercel z nej urobí len náhľad).
+- Na novom PC nastavte `git config --global user.name` a `user.email`. Potrebné je Node.js 20+ a Git.
